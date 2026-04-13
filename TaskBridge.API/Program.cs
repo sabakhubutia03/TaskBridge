@@ -55,6 +55,7 @@ builder.Services.AddAuthentication("bearer")
     });
 
 builder.Services.AddScoped<IApplicationDbContext, AppDbContext>(); 
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
 
