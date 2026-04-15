@@ -2,7 +2,7 @@
 
 namespace TaskBridge.Domain.Entity;
 
-public class Application
+public class Applicationn
 {
     public Guid Id { get; set; }
     

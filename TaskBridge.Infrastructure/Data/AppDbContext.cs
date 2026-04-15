@@ -11,7 +11,7 @@ public class AppDbContext :  DbContext , IApplicationDbContext
     }
     public DbSet<User> Users { get; set; }
     public DbSet<TaskItem> Tasks { get; set; }
-    public DbSet<TaskBridge.Domain.Entity.Application> Applications { get; set; } 
+    public DbSet<TaskBridge.Domain.Entity.Applicationn> Applications { get; set; } 
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,7 +21,7 @@ public class AppDbContext :  DbContext , IApplicationDbContext
             .Property(t => t.Budget)
             .HasPrecision(18, 2);
         
-        modelBuilder.Entity<TaskBridge.Domain.Entity.Application>()
+        modelBuilder.Entity<TaskBridge.Domain.Entity.Applicationn>()
             .HasOne(a => a.Freelancer)
             .WithMany()
             .HasForeignKey(a => a.FreelancerId)

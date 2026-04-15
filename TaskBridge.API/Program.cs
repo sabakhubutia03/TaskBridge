@@ -57,6 +57,11 @@ builder.Services.AddAuthentication("bearer")
 builder.Services.AddScoped<IApplicationDbContext, AppDbContext>(); 
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

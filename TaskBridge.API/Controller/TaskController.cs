@@ -10,20 +10,19 @@ namespace TaskBridge.Controller;
 public class TaskController : ControllerBase
 {
     private readonly ITaskService _taskService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public TaskController(ITaskService taskService)
+    public TaskController(ITaskService taskService, ICurrentUserService currentUserService)
     {
         _taskService = taskService;
+        _currentUserService = currentUserService;
     }
     
     [HttpPost]
     public async Task<ActionResult> Post(TaskCreateDto dto)
     {
-        var userClaimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if(userClaimId == null)
-            return Unauthorized();
-        
-        var userId = Guid.Parse(userClaimId);
+        var userId = _currentUserService.UserId();
+        if(userId == Guid.Empty) return Unauthorized();
         
         var result = await _taskService.CreateTask(dto, userId);
         return Ok(result);
@@ -39,11 +38,8 @@ public class TaskController : ControllerBase
     [HttpGet("My-Tasks")]
     public async Task<ActionResult> GetMyTasks()
     {
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userIdClaim == null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
+       var userId = _currentUserService.UserId();
+       if (userId == Guid.Empty) return Unauthorized();
         
         var result = await _taskService.GetMyTasks(userId);
         return Ok(result);
@@ -52,12 +48,9 @@ public class TaskController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> Put(Guid id, TaskUpdateDto dto )
     {
-        var userClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userClaim == null)
-            return Unauthorized();
+        var userId = _currentUserService.UserId();
+        if (userId == Guid.Empty) return Unauthorized();
         
-        var userId = Guid.Parse(userClaim);
-
         var result = await _taskService.UpdateTask(id, dto, userId);
         return Ok(result);
         
