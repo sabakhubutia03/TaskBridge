@@ -4,6 +4,7 @@ using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
+using TaskBridge.Domain.Errors;
 
 namespace TaskBridge.Application.Services;
 
@@ -23,13 +24,25 @@ public class ApplicationService : IApplicationService
     {
         if (dto.TaskId == Guid.Empty)
         {
-            throw new ArgumentException("TaskId cannot be empty");
+            throw new ApiException(
+                "errors/bed request",
+                "Bad request",
+                400,
+                "TaskId cannot be empty",
+                "/api/users/Apply"
+            );
         }
 
         var task = await _dbContext.Tasks.FindAsync(dto.TaskId);
         if (task == null)
         {
-            throw new Exception("Task not found");
+            throw new ApiException(
+                "errors/not-found",
+                "Not Found",
+                404,
+                "Task not-found",
+                "/api/users/Apply"
+            );
         }
         
         var userId = _currentUserService.UserId();

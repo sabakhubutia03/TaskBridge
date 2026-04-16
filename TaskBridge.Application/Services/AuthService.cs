@@ -8,6 +8,7 @@ using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
+using TaskBridge.Domain.Errors;
 
 namespace TaskBridge.Application.Services;
 
@@ -26,7 +27,13 @@ public class AuthService : IAuthService
             (e => e.Email.ToLower() == dto.Email.ToLower());
         if (existingUser != null)
         {
-            throw new Exception("User with this email already exists");
+            throw new ApiException(
+                "errors/conflict",
+                "Conflict",
+                409,
+                "Email address already exists!",
+                "/api/users/Register"
+                );
         }
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -57,13 +64,25 @@ public class AuthService : IAuthService
             (e => e.Email.ToLower() == dto.Email.ToLower());
         if (user == null)
         {
-            throw new Exception("Invalid email or password");
+            throw new ApiException(
+                "errors/Bad Request",
+                "Bad Request",
+                400,
+                "Email address already exists!",
+                "/api/users/Login"
+            );
         }
 
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password,user.PasswordHash);
         if (!isPasswordValid)
         {
-            throw new Exception("Invalid passsword or Email");
+            throw new ApiException(
+                "errors/unauthorized",
+                "Unauthorized",
+                401,
+                "Invalid email or password",
+                "/api/users/Login"
+                );
         }
 
         var tokeHendler = new JwtSecurityTokenHandler();

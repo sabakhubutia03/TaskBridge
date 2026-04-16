@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Services;
 using TaskBridge.Infrastructure.Data;
+using TaskBridge.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +71,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthentication(); 

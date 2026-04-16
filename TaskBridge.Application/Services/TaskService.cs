@@ -3,6 +3,7 @@ using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
+using TaskBridge.Domain.Errors;
 
 namespace TaskBridge.Application.Services;
 
@@ -17,14 +18,32 @@ public class TaskService : ITaskService
     public async Task<TaskDto> CreateTask(TaskCreateDto dto , Guid currentUserId)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new ArgumentException("Title is required");
-        
+            throw new ApiException(
+                "errors/bad-request",
+                "Bad Request",
+                400,
+                "Title cannot be empty",
+                "/api/users/CreateTask"
+            );
+
 
         if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Description is required");
+            throw new ApiException(
+                "errors/bad-request",
+                "Bad Request",
+                400,
+                "Description cannot be empty",
+                "/api/users/CreateTask"
+            );
 
         if (dto.Budget <=0) 
-            throw new ArgumentException("Budget is required");
+            throw new ApiException(
+                "errors/bad-request",
+                "Bad Request",
+                400,
+                "Budget cannot be negative",
+                "/api/users/CreateTask"
+            );
         
         var task = new TaskItem
         {
@@ -87,7 +106,13 @@ public class TaskService : ITaskService
             (t => t.Id == id && t.UserId == userId);
         if (task == null)
         {
-            throw new Exception("Task not found");
+            throw new ApiException(
+                "errors/not-found",
+                "Not Found",
+                404,
+                "Task with ID not found or you don't have permission.",
+                "/api/task/update"
+            );
         }
 
         if (!string.IsNullOrWhiteSpace(dto.Title))
