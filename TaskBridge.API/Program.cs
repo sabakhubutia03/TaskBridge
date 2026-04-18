@@ -1,9 +1,11 @@
 using System.Text;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Services;
+using TaskBridge.Application.Validators;
 using TaskBridge.Infrastructure.Data;
 using TaskBridge.Middleware;
 
@@ -61,6 +63,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<TaskCreateDtoValidator>();
 
 
 var app = builder.Build();

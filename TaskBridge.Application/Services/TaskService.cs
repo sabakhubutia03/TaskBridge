@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
+using TaskBridge.Application.Validators;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
 using TaskBridge.Domain.Errors;
@@ -10,40 +12,32 @@ namespace TaskBridge.Application.Services;
 public class TaskService : ITaskService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IValidator<TaskCreateDto> _validator;
+    private readonly IValidator<TaskUpdateDto> _updateValidator;
 
-    public TaskService(IApplicationDbContext context)
+    public TaskService(
+        IApplicationDbContext context,
+        IValidator<TaskCreateDto> validator,
+        IValidator<TaskUpdateDto> updateValidator)
     {
         _context = context;
+        _validator = validator;
+        _updateValidator = updateValidator;
     }
     public async Task<TaskDto> CreateTask(TaskCreateDto dto , Guid currentUserId)
     {
-        if (string.IsNullOrWhiteSpace(dto.Title))
+        var validatorResult = await _validator.ValidateAsync(dto);
+        if (!validatorResult.IsValid)
+        {
+            var errorMessage = validatorResult.Errors.First().ErrorMessage;
             throw new ApiException(
                 "errors/bad-request",
                 "Bad Request",
                 400,
-                "Title cannot be empty",
+                errorMessage,
                 "/api/users/CreateTask"
             );
-
-
-        if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ApiException(
-                "errors/bad-request",
-                "Bad Request",
-                400,
-                "Description cannot be empty",
-                "/api/users/CreateTask"
-            );
-
-        if (dto.Budget <=0) 
-            throw new ApiException(
-                "errors/bad-request",
-                "Bad Request",
-                400,
-                "Budget cannot be negative",
-                "/api/users/CreateTask"
-            );
+        }
         
         var task = new TaskItem
         {
@@ -102,9 +96,10 @@ public class TaskService : ITaskService
 
     public async Task<TaskDto> UpdateTask(Guid id, TaskUpdateDto dto, Guid userId)
     {
+        var validationResult = await _updateValidator.ValidateAsync(dto);
         var task = await _context.Tasks.FirstOrDefaultAsync
             (t => t.Id == id && t.UserId == userId);
-        if (task == null)
+        if (!validationResult.IsValid)
         {
             throw new ApiException(
                 "errors/not-found",
@@ -120,7 +115,7 @@ public class TaskService : ITaskService
             task.Title = dto.Title;
         }
 
-        if (!string.IsNullOrWhiteSpace(task.Description))
+        if (!string.IsNullOrWhiteSpace(dto.Description))
         {
             task.Description =  dto.Description;
         }
