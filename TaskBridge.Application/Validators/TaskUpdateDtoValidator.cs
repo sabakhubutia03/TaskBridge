@@ -1,5 +1,4 @@
-﻿using System.Data;
-using FluentValidation;
+﻿using FluentValidation;
 using TaskBridge.Application.DTOs;
 
 namespace TaskBridge.Application.Validators;

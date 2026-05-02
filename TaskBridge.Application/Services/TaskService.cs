@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
-using TaskBridge.Application.Validators;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
 using TaskBridge.Domain.Errors;
@@ -101,13 +100,25 @@ public class TaskService : ITaskService
             (t => t.Id == id && t.UserId == userId);
         if (!validationResult.IsValid)
         {
+            var errorMessage = validationResult.Errors.First().ErrorMessage;
+            throw new ApiException(
+                "errors/bed-request",
+                "Not Found",
+                400,
+                errorMessage,
+                "/api/task/update"
+            );
+        }
+
+        if (task == null)
+        {
             throw new ApiException(
                 "errors/not-found",
                 "Not Found",
                 404,
                 "Task with ID not found or you don't have permission.",
                 "/api/task/update"
-            );
+                );
         }
 
         if (!string.IsNullOrWhiteSpace(dto.Title))

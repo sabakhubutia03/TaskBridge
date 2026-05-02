@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -16,13 +17,29 @@ public class AuthService : IAuthService
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IConfiguration _configuration;
-    public AuthService(IApplicationDbContext dbContext, IConfiguration configuration)
+    private readonly IValidator<RegisterDto> _registerDtoValidator;
+    private readonly IValidator<LoginDto> _loginDtoValidator;
+    public AuthService(IApplicationDbContext dbContext, IConfiguration configuration, IValidator<RegisterDto> registerDtoValidator, IValidator<LoginDto> loginDtoValidator)
     {
         _dbContext = dbContext;
         _configuration = configuration;
+        _registerDtoValidator = registerDtoValidator;
+        _loginDtoValidator = loginDtoValidator;
     }
     public async Task<UserDto> Register(RegisterDto dto)
     {
+        var validatorResult = await _registerDtoValidator.ValidateAsync(dto);
+        if (!validatorResult.IsValid)
+        {
+            var errorMessages = validatorResult.Errors.First().ErrorMessage;
+            throw new ApiException(
+                "errors/bed-request",
+                "Bed Request",
+                400,
+                errorMessages,
+                "/api/users/Register"
+                );
+        }
         var existingUser = await _dbContext.Users.FirstOrDefaultAsync
             (e => e.Email.ToLower() == dto.Email.ToLower());
         if (existingUser != null)
@@ -60,6 +77,18 @@ public class AuthService : IAuthService
 
     public async Task<string> Login(LoginDto dto)
     {
+        var validatorResult = await _loginDtoValidator.ValidateAsync(dto);
+        if (!validatorResult.IsValid)
+        {
+            var erroMessages = validatorResult.Errors.First().ErrorMessage;
+            throw new ApiException(
+                "errors/bed-request",
+                "Bed Request",
+                400,
+                erroMessages,
+                "/api/users/Login"
+            );
+        }
         var user = await _dbContext.Users.FirstOrDefaultAsync
             (e => e.Email.ToLower() == dto.Email.ToLower());
         if (user == null)
@@ -68,7 +97,7 @@ public class AuthService : IAuthService
                 "errors/Bad Request",
                 "Bad Request",
                 400,
-                "Email address already exists!",
+                "Invalid email or password",
                 "/api/users/Login"
             );
         }
