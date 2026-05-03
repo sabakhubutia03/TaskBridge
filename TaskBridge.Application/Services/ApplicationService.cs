@@ -69,9 +69,7 @@ public class ApplicationService : IApplicationService
 
     public async Task<IEnumerable<ApplicationDto>> GetTaskApplications()
     {
-        var frilancerId  = _currentUserService.UserId();
-        var applications = await _dbContext.Applications.Where
-            (a => a.FreelancerId == frilancerId)
+        var applications = await _dbContext.Applications
             .ToListAsync();
         
         return applications.Select(a => new ApplicationDto
