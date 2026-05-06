@@ -156,5 +156,73 @@ public class TaskServiceTest
       Assert.Equal(dto.Title, result.Title);
       Assert.Equal(dto.Description, result.Description);
    }
+
+   [Fact]
+   public async Task Update_TaskWhenIsValid_ShouldReturnFalse()
+   {
+      var dto = new TaskUpdateDto
+      {
+         Title = "",
+         Description = "Test-Description",
+         Budget = 0,
+      };
+      var taskId = Guid.NewGuid();
+      var userId = Guid.NewGuid();
+      
+      _mockUpdateValidator
+         .Setup(v => v.ValidateAsync(dto, default))
+         .ReturnsAsync(new  ValidationResult(new List<ValidationFailure>
+         {
+            new ValidationFailure("Title", "Title is required")
+         })); 
+      
+
+      await Assert.ThrowsAsync<ApiException>(() =>
+         _taskService.UpdateTask(taskId, dto, userId));
+   }
+
+   [Fact]
+   public async Task Update_TaskWhenDescriptionIsInvalid_ShouldReturnFalse()
+   {
+      var dto = new TaskUpdateDto
+      {
+         Title = "Test-Title",
+         Description = "",
+         Budget = 100,
+      };
+      var taskId = Guid.NewGuid();
+      var userId = Guid.NewGuid(); 
+      
+      _mockUpdateValidator
+         .Setup(v => v.ValidateAsync(dto, default))
+         .ReturnsAsync(new ValidationResult( new List<ValidationFailure>
+         {
+            new ValidationFailure("Description", "Description is required")
+         })); 
+      
+      await Assert.ThrowsAsync<ApiException>(() =>
+         _taskService.UpdateTask(taskId, dto, userId));
+   }
+
+   [Fact]
+   public async Task Update_TaskWhenTaskIsNull_ShouldReturnFalse()
+   {
+      var task = new TaskUpdateDto
+      {
+         Title = "Test-Title",
+         Description = "Test-Description",
+         Budget = 100,
+      };
+      var userId = Guid.NewGuid();
+      var taskId = Guid.NewGuid();
+
+      _mockUpdateValidator
+         .Setup(v => v.ValidateAsync(task,default))
+         .ReturnsAsync(new ValidationResult());
+      
+      await Assert.ThrowsAsync<ApiException>(() =>
+         _taskService.UpdateTask(taskId, task, userId));
+
+   }
    
 }
