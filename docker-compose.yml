@@ -1,0 +1,23 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "TaskBridge@123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433" 
+    volumes: 
+      - sqlserver-data:/var/opt/mssql
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TaskBridgeDb;User Id=sa;Password=TaskBridge@123;TrustServerCertificate=True
+    depends_on:
+      - sqlserver 
+    
+volumes: 
+    sqlserver-data:
