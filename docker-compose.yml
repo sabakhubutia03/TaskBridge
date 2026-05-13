@@ -8,7 +8,12 @@ services:
       - "1433:1433" 
     volumes: 
       - sqlserver-data:/var/opt/mssql
-
+  
+  redis : 
+    image: redis:latest
+    ports: 
+      - "6379:6379"
+  
   api:
     build: .
     ports:
@@ -16,8 +21,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TaskBridgeDb;User Id=sa;Password=TaskBridge@123;TrustServerCertificate=True
+      - ConnectionStrings__Redis=redis:6379
     depends_on:
       - sqlserver 
+      - redis 
     
 volumes: 
     sqlserver-data:

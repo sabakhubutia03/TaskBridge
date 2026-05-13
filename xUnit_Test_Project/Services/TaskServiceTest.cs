@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using StackExchange.Redis;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Services;
 using TaskBridge.Domain.Entity;
@@ -16,6 +17,7 @@ public class TaskServiceTest
    private readonly AppDbContext _appDbContext;
    private readonly Mock<IValidator<TaskCreateDto>> _mockCreateValidator;
    private readonly Mock<IValidator<TaskUpdateDto>> _mockUpdateValidator;
+   private readonly Mock<IConnectionMultiplexer> _redisConnectionMultiplexer;
    private readonly TaskService _taskService;
 
    public TaskServiceTest()
@@ -27,11 +29,13 @@ public class TaskServiceTest
       _appDbContext = new AppDbContext(options);
       _mockCreateValidator = new Mock<IValidator<TaskCreateDto>>();
       _mockUpdateValidator = new Mock<IValidator<TaskUpdateDto>>();
+      _redisConnectionMultiplexer = new Mock<IConnectionMultiplexer>();
 
       _taskService = new TaskService(
          _appDbContext,
          _mockCreateValidator.Object,
-         _mockUpdateValidator.Object
+         _mockUpdateValidator.Object,
+         _redisConnectionMultiplexer.Object
       );
    }
 

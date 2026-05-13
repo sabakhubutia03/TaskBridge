@@ -1,5 +1,7 @@
-﻿using FluentValidation;
+﻿using System.Text.Json;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Entity;
@@ -13,15 +15,18 @@ public class TaskService : ITaskService
     private readonly IApplicationDbContext _context;
     private readonly IValidator<TaskCreateDto> _validator;
     private readonly IValidator<TaskUpdateDto> _updateValidator;
+    private readonly IConnectionMultiplexer _redis;
 
     public TaskService(
         IApplicationDbContext context,
         IValidator<TaskCreateDto> validator,
-        IValidator<TaskUpdateDto> updateValidator)
+        IValidator<TaskUpdateDto> updateValidator, 
+        IConnectionMultiplexer redis)
     {
         _context = context;
         _validator = validator;
         _updateValidator = updateValidator;
+        _redis = redis;
     }
     public async Task<TaskDto> CreateTask(TaskCreateDto dto , Guid currentUserId)
     {
@@ -51,6 +56,9 @@ public class TaskService : ITaskService
         _context.Tasks.Add(task);
         await _context.SaveChangesAsync();
 
+        var db = _redis.GetDatabase();
+        await db.KeyDeleteAsync("Tasks:all");
+        
         return new TaskDto
         {
             Id = task.Id,
@@ -64,8 +72,16 @@ public class TaskService : ITaskService
 
     public async Task<IEnumerable<TaskDto>> GetAllTasks()
     {
-        var taskws = await _context.Tasks.ToListAsync();
-        return taskws.Select(t => new TaskDto
+        var  db =  _redis.GetDatabase();
+        var chached = await db.StringGetAsync("Tasks:all");
+        
+        if (!chached.IsNullOrEmpty)
+        {
+            return JsonSerializer.Deserialize<IEnumerable<TaskDto>>(chached);
+        }
+        
+        var tasks = await _context.Tasks.ToListAsync();
+        var taskDtos = tasks.Select(t => new TaskDto
             {
                 Id = t.Id,
                 Title = t.Title,
@@ -75,6 +91,12 @@ public class TaskService : ITaskService
                 CreatedAt = t.CreatedAt
             }
         ).ToList();
+
+        await db.StringSetAsync("Tasks:all",
+            JsonSerializer.Serialize(taskDtos),
+            TimeSpan.FromMinutes(10)
+        ); 
+        return taskDtos;
     }
 
     public async Task<IEnumerable<TaskDto>> GetMyTasks(Guid UserId)
@@ -136,7 +158,11 @@ public class TaskService : ITaskService
             task.Budget =  dto.Budget;
         }
         
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(); 
+        
+        var db = _redis.GetDatabase();
+        await db.KeyDeleteAsync("Tasks:all");
+        
         return new TaskDto
         {
             Id = task.Id,
