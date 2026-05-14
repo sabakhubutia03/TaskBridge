@@ -17,7 +17,8 @@ public class TaskServiceTest
    private readonly AppDbContext _appDbContext;
    private readonly Mock<IValidator<TaskCreateDto>> _mockCreateValidator;
    private readonly Mock<IValidator<TaskUpdateDto>> _mockUpdateValidator;
-   private readonly Mock<IConnectionMultiplexer> _redisConnectionMultiplexer;
+   private readonly Mock<IConnectionMultiplexer> _redisConnectionMultiplexer; 
+   private readonly Mock<IDatabase> _mockredisDatabase;
    private readonly TaskService _taskService;
 
    public TaskServiceTest()
@@ -29,7 +30,12 @@ public class TaskServiceTest
       _appDbContext = new AppDbContext(options);
       _mockCreateValidator = new Mock<IValidator<TaskCreateDto>>();
       _mockUpdateValidator = new Mock<IValidator<TaskUpdateDto>>();
-      _redisConnectionMultiplexer = new Mock<IConnectionMultiplexer>();
+      _redisConnectionMultiplexer = new Mock<IConnectionMultiplexer>(); 
+      _mockredisDatabase = new Mock<IDatabase>(); 
+      
+      _redisConnectionMultiplexer
+         .Setup(x => x.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
+         .Returns(_mockredisDatabase.Object);
 
       _taskService = new TaskService(
          _appDbContext,
@@ -56,7 +62,11 @@ public class TaskServiceTest
       
       var result = await _taskService.CreateTask(dto,currentUserId);
       Assert.NotNull(result);
-      Assert.Equal(dto.Title, result.Title);
+      Assert.Equal(dto.Title, result.Title); 
+      
+      _mockredisDatabase
+         .Setup(x => x.KeyDeleteAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+         .ReturnsAsync(true);
       
    }
 
