@@ -12,7 +12,13 @@ services:
   redis : 
     image: redis:latest
     ports: 
-      - "6379:6379"
+      - "6379:6379" 
+  
+  rabbitmq : 
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" 
+      - "15672:15672"
   
   api:
     build: .
@@ -22,9 +28,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TaskBridgeDb;User Id=sa;Password=TaskBridge@123;TrustServerCertificate=True
       - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__RabbitMQ=rabbitmq
     depends_on:
       - sqlserver 
-      - redis 
+      - redis  
+      - rabbitmq
     
 volumes: 
     sqlserver-data:

@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
+using TaskBridge.Application.Messages;
 using TaskBridge.Application.Services;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
@@ -15,6 +17,7 @@ public class ApplicationServiceTest
     private readonly AppDbContext _dbContext;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock; 
     private readonly ApplicationService _applicationService;
+    private readonly Mock<IPublishEndpoint> _publishEndpointMock;
 
     public ApplicationServiceTest()
     {
@@ -24,8 +27,17 @@ public class ApplicationServiceTest
         
         _dbContext = new AppDbContext(option);
         _currentUserServiceMock = new Mock<ICurrentUserService>(); 
-         
-        _applicationService = new ApplicationService(_dbContext, _currentUserServiceMock.Object);
+        _publishEndpointMock = new Mock<IPublishEndpoint>();
+        
+        _publishEndpointMock
+            .Setup(x => x.Publish(It.IsAny<ApplicationSubmittedMessage>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        _applicationService = new ApplicationService(
+            _dbContext,
+            _currentUserServiceMock.Object ,
+            _publishEndpointMock.Object
+            );
         
     }
 

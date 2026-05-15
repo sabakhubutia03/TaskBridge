@@ -1,7 +1,8 @@
-﻿using System.Net.Mime;
+﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
+using TaskBridge.Application.Messages;
 using TaskBridge.Domain.Entity;
 using TaskBridge.Domain.Enums;
 using TaskBridge.Domain.Errors;
@@ -12,11 +13,13 @@ public class ApplicationService : IApplicationService
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public ApplicationService(IApplicationDbContext dbContext, ICurrentUserService currentUserService)
+    public ApplicationService(IApplicationDbContext dbContext, ICurrentUserService currentUserService, IPublishEndpoint publishEndpoint)
     {
         _dbContext = dbContext;
         _currentUserService = currentUserService;
+        _publishEndpoint = publishEndpoint;
     }
     
     
@@ -57,6 +60,16 @@ public class ApplicationService : IApplicationService
         
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
+
+
+        await _publishEndpoint.Publish(new ApplicationSubmittedMessage
+        {
+            ApplicationId = application.Id,
+            TaskId = application.TaskItemId,
+            FreelancerId = application.FreelancerId,
+            SubmittedAt = application.Created
+
+        });
         
         return new ApplicationDto
         {
