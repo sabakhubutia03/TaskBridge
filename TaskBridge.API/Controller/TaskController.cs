@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
+using TaskBridge.Application.Queries;
 
 namespace TaskBridge.Controller;
 [Authorize]
@@ -11,11 +13,13 @@ public class TaskController : ControllerBase
 {
     private readonly ITaskService _taskService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IMediator _mediator;
 
-    public TaskController(ITaskService taskService, ICurrentUserService currentUserService)
+    public TaskController(ITaskService taskService, ICurrentUserService currentUserService, IMediator mediator)
     {
         _taskService = taskService;
         _currentUserService = currentUserService;
+        _mediator = mediator;
     }
     
     [HttpPost]
@@ -31,7 +35,7 @@ public class TaskController : ControllerBase
     [HttpGet("All")]
     public async Task<ActionResult> GetTask()
     {
-      var result =   await _taskService.GetAllTasks();
+        var result = await _mediator.Send(new GetAllTasksQuery());
       return Ok(result);
     }
 

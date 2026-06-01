@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Messages;
+using TaskBridge.Application.Queries;
 using TaskBridge.Application.Services;
 using TaskBridge.Application.Validators;
 using TaskBridge.Infrastructure.Consumers;
@@ -86,6 +87,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(GetAllTasksQuery).Assembly));
 
 builder.Services.AddValidatorsFromAssemblyContaining<TaskCreateDtoValidator>();
 
