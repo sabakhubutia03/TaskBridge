@@ -39,10 +39,7 @@ public class TaskController : ControllerBase
     [HttpGet("My-Tasks")]
     public async Task<ActionResult> GetMyTasks()
     {
-       var userId = _currentUserService.UserId();
-       if (userId == Guid.Empty) return Unauthorized();
-        
-        var result = await _taskService.GetMyTasks(userId);
+        var result = await _mediator.Send(new GetMyTasksQuery());
         return Ok(result);
     }
 
