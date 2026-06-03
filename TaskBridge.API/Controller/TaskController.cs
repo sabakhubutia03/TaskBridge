@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskBridge.Application.Commands;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
@@ -21,15 +22,11 @@ public class TaskController : ControllerBase
         _currentUserService = currentUserService;
         _mediator = mediator;
     }
-    
     [HttpPost]
-    public async Task<ActionResult> Post(TaskCreateDto dto)
+    public async Task<ActionResult> Create(CreateTaskCommand command)
     {
-        var userId = _currentUserService.UserId();
-        if(userId == Guid.Empty) return Unauthorized();
-        
-        var result = await _taskService.CreateTask(dto, userId);
-        return Ok(result);
+        var creta = await _mediator.Send(command);
+        return Ok(creta);
     }
 
     [HttpGet("All")]

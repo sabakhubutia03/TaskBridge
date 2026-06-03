@@ -1,12 +1,14 @@
 using System.Text;
 using FluentValidation;
 using MassTransit;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using TaskBridge.Application.Behaviors;
+using TaskBridge.Application.Commands;
 using TaskBridge.Application.Interfaces;
-using TaskBridge.Application.Messages;
 using TaskBridge.Application.Queries;
 using TaskBridge.Application.Services;
 using TaskBridge.Application.Validators;
@@ -87,8 +89,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(GetAllTasksQuery).Assembly));
+{
+    cfg.RegisterServicesFromAssemblies(typeof(GetAllTasksQuery).Assembly);
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>) , typeof(ValidatorBehavior<,>));
+});
 
 builder.Services.AddValidatorsFromAssemblyContaining<TaskCreateDtoValidator>();
 
