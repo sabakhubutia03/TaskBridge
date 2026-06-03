@@ -56,4 +56,11 @@ public class TaskController : ControllerBase
         return Ok(result);
         
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var delete = await _mediator.Send(new DeleteTaskCommand(id));
+        return Ok(delete);
+    }
 }
