@@ -12,14 +12,10 @@ namespace TaskBridge.Controller;
 [Route("api/[controller]")]
 public class TaskController : ControllerBase
 {
-    private readonly ITaskService _taskService;
-    private readonly ICurrentUserService _currentUserService;
     private readonly IMediator _mediator;
 
-    public TaskController(ITaskService taskService, ICurrentUserService currentUserService, IMediator mediator)
+    public TaskController(IMediator mediator)
     {
-        _taskService = taskService;
-        _currentUserService = currentUserService;
         _mediator = mediator;
     }
     [HttpPost]
@@ -44,14 +40,11 @@ public class TaskController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Put(Guid id, TaskUpdateDto dto )
+    public async Task<ActionResult> Update(Guid id, UpdateTaskCommand command)
     {
-        var userId = _currentUserService.UserId();
-        if (userId == Guid.Empty) return Unauthorized();
-        
-        var result = await _taskService.UpdateTask(id, dto, userId);
+        var commandWithId = command with {TaskId = id};
+        var result = await _mediator.Send(commandWithId);
         return Ok(result);
-        
     }
 
     [HttpDelete("{id}")]
