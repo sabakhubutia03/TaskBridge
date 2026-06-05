@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using StackExchange.Redis;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Entity;
@@ -10,11 +11,13 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand,TaskDt
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
 
-    public CreateTaskCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+    public CreateTaskCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, IConnectionMultiplexer connectionMultiplexer)
     {
         _context = context;
         _currentUserService = currentUserService;
+        _connectionMultiplexer = connectionMultiplexer;
     }
 
     public async Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -32,7 +35,10 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand,TaskDt
 
         _context.Tasks.Add(task);
         await _context.SaveChangesAsync(cancellationToken);
-
+        
+        var db = _connectionMultiplexer.GetDatabase();
+        await db.KeyDeleteAsync("Tasks:all");
+        
         return new TaskDto
         {
             Id = task.Id,

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using TaskBridge.Application.DTOs;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Domain.Errors;
@@ -10,11 +11,13 @@ public class UpdateTasksCommandHandler : IRequestHandler<UpdateTaskCommand,TaskD
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
     
-    public UpdateTasksCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+    public UpdateTasksCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, IConnectionMultiplexer connectionMultiplexer)
     {
         _context = context;
         _currentUserService = currentUserService;
+        _connectionMultiplexer = connectionMultiplexer;
     }
     public async Task<TaskDto> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
     {
@@ -48,7 +51,9 @@ public class UpdateTasksCommandHandler : IRequestHandler<UpdateTaskCommand,TaskD
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-
+        
+        var db = _connectionMultiplexer.GetDatabase();
+        await db.KeyDeleteAsync("Tasks:all");
         return new TaskDto
         {
             Id = task.Id,

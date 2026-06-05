@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBridge.Application.Commands;
-using TaskBridge.Application.DTOs;
-using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
 
 namespace TaskBridge.Controller;
