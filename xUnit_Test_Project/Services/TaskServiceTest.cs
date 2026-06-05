@@ -26,7 +26,7 @@ public class TaskServiceTest
       var options = new DbContextOptionsBuilder<AppDbContext>()
          .UseInMemoryDatabase(Guid.NewGuid().ToString())
          .Options;
-
+   
       _appDbContext = new AppDbContext(options);
       _mockCreateValidator = new Mock<IValidator<TaskCreateDto>>();
       _mockUpdateValidator = new Mock<IValidator<TaskUpdateDto>>();
