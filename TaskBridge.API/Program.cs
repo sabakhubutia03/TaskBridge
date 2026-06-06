@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using TaskBridge.Application.Behaviors;
-using TaskBridge.Application.Commands;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
 using TaskBridge.Application.Services;
@@ -84,7 +83,6 @@ builder.Services.AddAuthentication("bearer")
     });
 
 builder.Services.AddScoped<IApplicationDbContext, AppDbContext>(); 
-builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
