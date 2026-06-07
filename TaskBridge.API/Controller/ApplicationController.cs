@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBridge.Application.Commands;
 using TaskBridge.Application.Interfaces;
+using TaskBridge.Application.Queries;
 
 namespace TaskBridge.Controller;
 [Authorize]
@@ -35,10 +36,11 @@ public class ApplicationController : ControllerBase
     }
 
     [HttpGet("All-Applications")]
+
     public async Task<ActionResult> GetAllApplications()
     {
-      var allApplication =  await _applicationService.GetTaskApplications();
-        return Ok(allApplication);
+        var allApply = await _mediator.Send(new GetAllApplicationQuery());
+        return Ok(allApply);
     }
     
 }
