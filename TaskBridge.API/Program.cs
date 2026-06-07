@@ -10,7 +10,7 @@ using TaskBridge.Application.Behaviors;
 using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
 using TaskBridge.Application.Services;
-using TaskBridge.Application.Validators;
+using TaskBridge.Application.Validatorss;
 using TaskBridge.Infrastructure.Consumers;
 using TaskBridge.Infrastructure.Data;
 using TaskBridge.Middleware;
@@ -88,6 +88,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskCommandValidator>();
+
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -95,7 +97,6 @@ builder.Services.AddMediatR(cfg =>
     cfg.AddBehavior(typeof(IPipelineBehavior<,>) , typeof(ValidatorBehavior<,>));
 });
 
-builder.Services.AddValidatorsFromAssemblyContaining<TaskCreateDtoValidator>();
 
 
 var app = builder.Build();

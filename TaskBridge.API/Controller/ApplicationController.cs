@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskBridge.Application.DTOs;
+using TaskBridge.Application.Commands;
 using TaskBridge.Application.Interfaces;
 
 namespace TaskBridge.Controller;
@@ -10,17 +11,19 @@ namespace TaskBridge.Controller;
 public class ApplicationController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IMediator _mediator;
 
-    public ApplicationController(IApplicationService applicationService)
+    public ApplicationController(IApplicationService applicationService, IMediator mediator)
     {
         _applicationService = applicationService;
+        _mediator = mediator;
     }
 
 
     [HttpPost]
-    public async Task<ActionResult> CreateApplication(ApplicationCreateDto dto)
+    public async Task<ActionResult> CreateApply(CreateApplicationCommand command)
     {
-        var create = await _applicationService.ApplyToTask(dto);
+        var create = await _mediator.Send(command);
         return Ok(create);
     }
 
