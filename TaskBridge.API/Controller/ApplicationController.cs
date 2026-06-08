@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBridge.Application.Commands;
-using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
 
 namespace TaskBridge.Controller;
@@ -11,12 +10,10 @@ namespace TaskBridge.Controller;
 [Route("api/[controller]")]
 public class ApplicationController : ControllerBase
 {
-    private readonly IApplicationService _applicationService;
     private readonly IMediator _mediator;
 
-    public ApplicationController(IApplicationService applicationService, IMediator mediator)
+    public ApplicationController(IMediator mediator)
     {
-        _applicationService = applicationService;
         _mediator = mediator;
     }
 
@@ -29,10 +26,10 @@ public class ApplicationController : ControllerBase
     }
 
     [HttpGet("My-Application")]
-    public async Task<ActionResult> GetMyApp()
+    public async Task<ActionResult> GetMyApplication()
     {
-       var myApp =  await _applicationService.GetMyApplication();
-        return Ok(myApp);
+        var myAppy = await _mediator.Send(new GetMyApplicationQuery());
+        return Ok(myAppy);
     }
 
     [HttpGet("All-Applications")]
