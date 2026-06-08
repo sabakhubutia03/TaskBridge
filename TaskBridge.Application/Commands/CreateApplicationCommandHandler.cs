@@ -20,16 +20,7 @@ public class CreateApplicationCommandHandler :
     }
     public async Task<ApplicationDto> Handle(CreateApplicationCommand request, CancellationToken cancellationToken)
     {
-        if (request.TaskId == Guid.Empty)
-        {
-            throw new ApiException(
-                "errors/bed request",
-                "Bad request",
-                400,
-                "TaskId cannot be empty",
-                "/api/users/Apply"
-            );
-        }
+      
         var taskId = await _context.Tasks.FindAsync(request.TaskId);
         if (taskId == null)
         {
