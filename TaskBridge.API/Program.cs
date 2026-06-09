@@ -1,6 +1,5 @@
 using System.Text;
 using FluentValidation;
-using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +10,6 @@ using TaskBridge.Application.Interfaces;
 using TaskBridge.Application.Queries;
 using TaskBridge.Application.Services;
 using TaskBridge.Application.Validatorss;
-using TaskBridge.Infrastructure.Consumers;
 using TaskBridge.Infrastructure.Data;
 using TaskBridge.Middleware;
 
@@ -52,21 +50,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
 
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumer<ApplicationSubmittedConsumer>();
-    
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(builder.Configuration.GetConnectionString("RabbitMQ"), "/", h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
-        
-        cfg.ConfigureEndpoints(context);
-    });
-}); 
 
 builder.Services.AddAuthentication("bearer")
     .AddJwtBearer("bearer", options =>
