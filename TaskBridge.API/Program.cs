@@ -86,7 +86,6 @@ builder.Services.AddScoped<IApplicationDbContext, AppDbContext>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskCommandValidator>();
 
