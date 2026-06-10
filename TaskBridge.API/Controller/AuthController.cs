@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBridge.Application.Commands;
-using TaskBridge.Application.DTOs;
-using TaskBridge.Application.Interfaces;
 
 
 namespace TaskBridge.Controller;
@@ -11,20 +9,19 @@ namespace TaskBridge.Controller;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
     private readonly IMediator _mediator;
 
-    public AuthController(IAuthService authService, IMediator mediator)
+    public AuthController(IMediator mediator)
     {
-        _authService = authService;
         _mediator = mediator;
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult> Register(RegisterDto dto)
+
+    public async Task<ActionResult> Register([FromBody] RegisterCommand command)
     {
-        var result = await _authService.Register(dto);
-        return Ok(result);
+        var registerResult = await _mediator.Send(command);
+        return Ok(registerResult);
     }
 
     [HttpPost("login")]

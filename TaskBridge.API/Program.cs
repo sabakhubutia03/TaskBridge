@@ -66,7 +66,6 @@ builder.Services.AddAuthentication("bearer")
     });
 
 builder.Services.AddScoped<IApplicationDbContext, AppDbContext>(); 
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
