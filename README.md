@@ -1,57 +1,51 @@
 # 🌉 TaskBridge API (.NET 9)
 
-A scalable and production-oriented Freelance Marketplace REST API built with **ASP.NET Core Web API (.NET 9)**, following **Clean Architecture** principles and modern backend development practices.
-
-The project connects clients and freelancers through a secure and maintainable system focused on clean code, separation of concerns, validation, and reliable business logic.
+A scalable and production-ready Freelance Marketplace REST API built with **ASP.NET Core Web API (.NET 9)**, following **Clean Architecture** and **CQRS** principles.
 
 ---
 
 ## 🚀 Features
 
 ### 👤 Authentication & User Management
-
 - JWT Authentication for secure and stateless authorization
 - Role-Based Authorization (**Client / Freelancer**)
-- ASP.NET Core Identity integration
-- User profile management using DTOs
-- Secure password hashing and authentication flow
-
----
+- Secure password hashing with BCrypt
+- Register and Login with full validation
 
 ### 🛠 Marketplace & Task Management
-
 - Full CRUD operations for tasks/projects
 - Freelancers can apply to tasks
 - Clients can manage posted tasks
 - Clean separation between business logic and presentation layer
-- Repository Pattern implementation
 
----
+### ⚡ CQRS Pattern with MediatR
+- Commands and Queries fully separated
+- Pipeline Behaviors for automatic validation
+- Every operation has its own Handler
+- Clean and maintainable structure
+
+### 🔴 Redis Caching
+- GetAllTasks cached with 10 minute expiry
+- GetAllApplications cached
+- Cache invalidated on Create/Update/Delete
 
 ### ✅ Validation & Error Handling
-
-- FluentValidation integration for request validation
+- FluentValidation via Pipeline Behavior
 - Global Exception Handling Middleware
-- Custom Domain Exceptions
-- Standardized API error responses
-- Strong input validation and data consistency
-
----
+- Custom ApiException with standardized responses
+- Validation runs automatically before every Handler
 
 ### 🧪 Unit Testing
+- xUnit + Moq
+- InMemory Database for Handler tests
+- Separate Validator tests
+- Full coverage: Create, Read, Update, Delete, Auth
 
-Comprehensive unit testing implemented using:
-
-- xUnit
-- Moq
-
-#### Test Coverage Includes:
-
-- Successful service operations
-- Validation failures
-- NotFound scenarios
-- Mocked DbContext and repositories
-- Business logic isolation
+### 🐳 Docker
+- Docker Compose setup
+- SQL Server, Redis containers
+- Auto migration on startup
+- GitHub Actions CI/CD
 
 ---
 
@@ -62,104 +56,66 @@ Comprehensive unit testing implemented using:
 | ASP.NET Core Web API (.NET 9) | Backend Framework |
 | Entity Framework Core | ORM & Database Access |
 | SQL Server | Database |
-| ASP.NET Identity | Authentication & User Management |
 | JWT Authentication | Secure API Authorization |
-| FluentValidation | Request Validation |
+| MediatR | CQRS Pattern |
+| FluentValidation | Pipeline Validation |
+| Redis | Caching |
+| Docker | Containerization |
 | xUnit | Unit Testing |
 | Moq | Mocking Dependencies |
 | Clean Architecture | Project Structure |
-| Dependency Injection | Service Management |
+| GitHub Actions | CI/CD |
 
 ---
 
 ## 🏗 Architecture
 
-The project follows **Clean Architecture** to ensure maintainability, scalability, and separation of concerns.
+```
+TaskBridge.Domain
+└── Entities, Enums, Errors
 
-### 📁 Project Structure
+TaskBridge.Application
+├── Commands/       ← Write operations
+├── Queries/        ← Read operations
+├── Behaviors/      ← ValidationBehavior Pipeline
+├── DTOs/
+├── Interfaces/
+└── Validators/
 
-#### 📂 TaskBridge.Domain
+TaskBridge.Infrastructure
+├── Data/           ← AppDbContext
+└── Consumers/
 
-Contains:
+TaskBridge.API
+├── Controller/
+├── Middleware/
+└── Program.cs
 
-- Core Entities
-- Domain Exceptions
-- Business Rules
-
-#### 📂 TaskBridge.Application
-
-Contains:
-
-- Service Interfaces
-- DTOs
-- Validators
-- Application Logic
-
-#### 📂 TaskBridge.Infrastructure
-
-Contains:
-
-- ApplicationDbContext
-- Repository Implementations
-- Identity & JWT Services
-- Database Configuration
-
-#### 📂 TaskBridge.API
-
-Contains:
-
-- Controllers
-- Middleware
-- Authentication Configuration
-- Dependency Injection Setup
-
-#### 📂 xUnit_Test_Project
-
-Contains:
-
-- Unit Tests
-- Mocked Services
-- Validation and Business Logic Testing
+xUnit_Test_Project
+├── Handlers/       ← Handler tests
+└── Validators/     ← Validator tests
+```
 
 ---
 
 ## 🔒 Security
-
 - JWT Bearer Authentication
 - Role-Based Authorization
 - Protected API Endpoints
-- Secure Password Handling
-- Validation against invalid requests
-
----
-
-## 📌 Highlights
-
-- Clean Architecture Implementation
-- Repository Pattern
-- DTO-Based Communication
-- Middleware-Based Exception Handling
-- SOLID Principles
-- Unit Testing Best Practices
-- Scalable and Maintainable Structure
+- BCrypt Password Hashing
+- Automatic request validation via Pipeline
 
 ---
 
 ## 📈 Future Improvements
-
 - Refresh Tokens
-- Real-time Notifications
+- Real-time Notifications with SignalR
 - File Upload Support
-- Docker Support
 - API Versioning
 - Integration Testing
-- CI/CD Pipeline
 
 ---
 
 ## 👨‍💻 Author
-
-**Saba Khubutia**
-
-GitHub Repository:  
-https://github.com/sabakhubutia03/TaskBridge
+**Saba Khubutia**  
+GitHub: https://github.com/sabakhubutia03/TaskBridge
